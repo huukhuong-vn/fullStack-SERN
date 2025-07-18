@@ -12,6 +12,8 @@ let app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// Setup view engine
+
 viewEngine(app);
 initWebRoutes(app);
 connectDB();
