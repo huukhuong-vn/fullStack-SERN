@@ -50,7 +50,6 @@ const getUserInfoById = async (userId) => {
   try {
     const user = await db.User.findOne({
       where: { id: userId },
-      raw: true,
     });
     return user;
   } catch (e) {
@@ -65,6 +64,7 @@ const updateUserData = async (data) => {
       where: { id: data.id },
     });
     if (user) {
+      console.log(user);
       user.firstName = data.firstName;
       user.lastName = data.lastName;
       user.address = data.address;
@@ -72,7 +72,9 @@ const updateUserData = async (data) => {
       if (data.password) {
         user.password = hashUserPassword(data.password);
       }
-      await user.save();
+      await db.User.update(user, {
+        where: { id: data.id },
+      });
     }
   } catch (e) {
     console.error('Lỗi khi cập nhật thông tin user:', e);
@@ -86,10 +88,26 @@ const deleteUserById = async (userId) => {
       where: { id: userId },
     });
     if (user) {
-      await user.destroy();
+      await db.User.destroy({
+        where: { id: userId },
+      });
+      return { success: true, message: 'User deleted successfully' };
     }
+    // check existing user on database
   } catch (e) {
     console.error('Lỗi khi xoá user:', e);
+    throw e;
+  }
+};
+const deleteAllUsers = async () => {
+  try {
+    await db.User.destroy({
+      where: {},
+      truncate: true,
+      restartIdentity: true,
+    });
+  } catch (e) {
+    console.error('Lỗi khi xoá tất cả user:', e);
     throw e;
   }
 };
